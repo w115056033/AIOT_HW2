@@ -1,7 +1,25 @@
 # CRISP-DM Multiple Linear Regression Studio
 
-一個以 **CRISP-DM** 六階段流程打造的互動式多元線性迴歸平台，內含 **兩個 Kaggle 資料集
-（problem）**，用網站最上方的下拉選單即可切換整個頁面內容：
+以 **CRISP-DM** 六階段流程打造的互動式多元線性迴歸平台（**scikit-learn** + **Flask** +
+**Chart.js**），內建兩個 Kaggle 資料集，也可以載入任何 CSV 重跑整套分析。
+
+![網站首頁](docs/site.png)
+
+*網站首頁：最上方是 **Problem 下拉選單**與「**＋ 新增資料集**」按鈕，往下依序是 Hero 指標、
+CRISP-DM 六階段、模型探索器、互動預測與診斷。*
+
+## ✨ 兩個重點功能
+
+1. **🔀 下拉視窗切換兩種 Problem** — 導覽列最上方的 `PROBLEM` 下拉選單，切換後**整頁內容**
+   （hero 指標、CRISP-DM 六階段敘述與數據表、模型探索器、互動預測器、診斷與原始資料）
+   全部換成該資料集的版本；選擇會記在 URL（`#p=house`）與 `localStorage`。
+2. **📥 可任意輸入 Dataset** — 點「**＋ 新增資料集**」可貼上 **任何 CSV 的網址**，
+   或直接**貼上 CSV 文字**，瀏覽器端就會自動完成清理、One-Hot、切分、CV、特徵選擇、
+   OLS 推論統計與診斷，並把結果加入下拉選單（詳見下方「🧪 任意資料集」章節）。
+
+---
+
+## 📚 內建的兩個 Problem
 
 | Problem | 資料集 | 規模 | 預測變數 | 特徵選擇法 | k 範圍 |
 |---|---|---|---|---|---|
@@ -12,6 +30,27 @@
 * 前端：單一 `index.html` shell ＋ `static/app.js`（Chart.js 4、無框架、深／淺色主題）
 * 部署：**GitHub Pages**（純靜態）或 **Vercel / 任何 Flask 主機**
 * 選擇會記在 `localStorage` 與 URL（`#p=house`），重新整理後仍停在同一個 problem
+
+---
+
+## 📦 資料集來源
+
+| Problem | 原始出處（Kaggle） | 專案內檔案 | 免登入下載（本專案實際使用的鏡像） | 規模 | MD5 |
+|---|---|---|---|---|---|
+| **P1 · 50 Startups** | [Startup Profit Prediction](https://www.kaggle.com/datasets/vinicius150987/startup-profit-prediction) | `50_Startups.csv` | [Avik-Jain/100-Days-Of-ML-Code · `50_Startups.csv`](https://raw.githubusercontent.com/Avik-Jain/100-Days-Of-ML-Code/master/datasets/50_Startups.csv) | 50 × 5 | `53DF90C164682CA0F0582873EAFD4D93` |
+| **P2 · King County House** | [House Sales in King County, USA](https://www.kaggle.com/datasets/harlfoxem/housesalesprediction) | `kc_house_data.csv` | [ChengLi9/kc_house_data · `kc_house_data.csv`](https://raw.githubusercontent.com/ChengLi9/kc_house_data/HEAD/kc_house_data.csv) | 21,613 × 21 | `B1E7BDF4F3E61792C0979A5697DC7145` |
+
+* **Kaggle 頁面是原始出處**；下載 Kaggle 版本需要登入帳號，所以本專案改用上表「免登入下載」
+  的鏡像取得**相同內容**的 CSV，並把檔案直接附在 repo 根目錄，讓
+  `build_model_data.py` / `build_house_data.py` 可一鍵重現（不需網路）。
+* 可用 MD5 驗證檔案一致：`Get-FileHash -Algorithm MD5 50_Startups.csv kc_house_data.csv`（Windows PowerShell）、
+  `md5sum 50_Startups.csv kc_house_data.csv`（Linux / macOS）。
+* 欄位：P1 為 `R&D Spend, Administration, Marketing Spend, State, Profit`；
+  P2 為 `id, date, price, bedrooms, bathrooms, sqft_living, sqft_lot, floors, waterfront,
+  view, condition, grade, sqft_above, sqft_basement, yr_built, yr_renovated, zipcode,
+  lat, long, sqft_living15, sqft_lot15`。
+* 資料僅供課程作業與教學示範使用；P2 原始資料出自 King County（WA）開放資料，
+  由 Kaggle 使用者 harlfoxem 整理上傳。
 
 ---
 
@@ -111,6 +150,8 @@ curl -X POST http://localhost:5000/api/predict \
 導覽列的「**＋ 新增資料集**」可以對任何 CSV 重跑一次完整的 CRISP-DM：
 
 1. 貼上 **CSV 網址**（需支援 CORS，例如 GitHub raw、gist），或直接**貼上 CSV 文字**（完全繞過 CORS）
+   * 範例網址（可直接貼上試玩）：
+     `https://raw.githubusercontent.com/Avik-Jain/100-Days-Of-ML-Code/master/datasets/50_Startups.csv`
 2. 自動預覽前 8 列、列出可用的數值欄位，選好**目標欄位**
 3. 可調整測試集比例、CV 摺數、最大特徵數 k
 4. 按「開始分析」，瀏覽器端即時完成：
@@ -246,6 +287,9 @@ OLS 以正規方程式求解（對角預條件 + 高斯消去），CV 與測試�
 ├── 50_Startups.csv               # P1 資料集
 ├── startup_profit_model.joblib   # P1 最終 Pipeline（前處理 + 模型）
 ├── kc_house_data.csv             # P2 原始資料（21,613 × 21）
+├── docs/
+│   ├── site.png                  # 首頁截圖（README 封面）
+│   └── any-dataset.png           # 「新增資料集」對話框截圖
 └── .github/workflows/static.yml  # GitHub Pages 自動部署
 ```
 
