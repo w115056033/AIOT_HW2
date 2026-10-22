@@ -8,6 +8,9 @@
 *網站首頁：最上方是 **Problem 下拉選單**與「**＋ 新增資料集**」按鈕，往下依序是 Hero 指標、
 CRISP-DM 六階段、模型探索器、互動預測與診斷。*
 
+📄 **專案紀錄 PDF**：[`docs/hw2_report.pdf`](docs/hw2_report.pdf) — 兩大主題：
+**GPT 輔助內容**（本次完整對話紀錄）與 **NotebookLM 摘要**（House Prices 頂尖解法研究）。
+
 ## ✨ 兩個重點功能
 
 1. **🔀 下拉視窗切換兩種 Problem** — 導覽列最上方的 `PROBLEM` 下拉選單，切換後**整頁內容**
