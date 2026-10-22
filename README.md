@@ -3,13 +3,8 @@
 以 **CRISP-DM** 六階段流程打造的互動式多元線性迴歸平台（**scikit-learn** + **Flask** +
 **Chart.js**），內建兩個 Kaggle 資料集，也可以載入任何 CSV 重跑整套分析。
 
-![網站首頁](docs/site.png)
-
-*網站首頁：最上方是 **Problem 下拉選單**與「**＋ 新增資料集**」按鈕，往下依序是 Hero 指標、
-CRISP-DM 六階段、模型探索器、互動預測與診斷。*
-
-📄 **專案紀錄 PDF**：[`docs/hw2_report.pdf`](docs/hw2_report.pdf) — 兩大主題：
-**GPT 輔助內容**（本次完整對話紀錄）與 **NotebookLM 摘要**（House Prices 頂尖解法研究）。
+🐙 GitHub Repository: https://github.com/w115056033/AIOT_HW2
+🔗 Live Demo: https://w115056033.github.io/AIOT_HW2/
 
 ## ✨ 兩個重點功能
 
@@ -19,6 +14,14 @@ CRISP-DM 六階段、模型探索器、互動預測與診斷。*
 2. **📥 可任意輸入 Dataset** — 點「**＋ 新增資料集**」可貼上 **任何 CSV 的網址**，
    或直接**貼上 CSV 文字**，瀏覽器端就會自動完成清理、One-Hot、切分、CV、特徵選擇、
    OLS 推論統計與診斷，並把結果加入下拉選單（詳見下方「🧪 任意資料集」章節）。
+
+![網站首頁](docs/site.png)
+
+*網站首頁：最上方是 **Problem 下拉選單**與「**＋ 新增資料集**」按鈕，往下依序是 Hero 指標、
+CRISP-DM 六階段、模型探索器、互動預測與診斷。*
+
+📄 **專案紀錄 PDF**：[`docs/hw2_report.pdf`](docs/hw2_report.pdf) — 兩大主題：
+**GPT 輔助內容**（本次完整對話紀錄）與 **NotebookLM 摘要**（House Prices 頂尖解法研究）。
 
 ---
 
