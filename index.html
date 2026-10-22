@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="page-title">CRISP-DM 多元線性迴歸互動分析平台</title>
+<meta id="page-desc" name="description" content="CRISP-DM 六階段 × 多元線性迴歸 × 多種特徵選擇法 × 互動預測儀表板">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300f2fe'/%3E%3Cstop offset='1' stop-color='%23a855f7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23g)'/%3E%3Cpath d='M14 44 L26 32 L34 38 L50 20' stroke='%23020617' stroke-width='6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="static/site.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="static/problems.js"></script>
+<script src="static/data_startups.js"></script>
+<script src="static/analyze.js" defer></script>
+<script src="static/app.js" defer></script>
+<script src="static/dataset.js" defer></script>
+</head>
+<body>
+<div class="grid-overlay"></div>
+<div class="app">
+
+  <!-- ================= NAV ================= -->
+  <nav class="top-nav">
+    <div class="brand">
+      <div class="brand-logo">ML</div>
+      <div class="brand-text">
+        <b id="nav-title">CRISP-DM Studio</b>
+        <span id="nav-sub">Multiple Linear Regression</span>
+      </div>
+    </div>
+    <div class="problem-switch">
+      <span class="ps-label">Problem</span>
+      <div class="ps-body">
+        <select class="problem-select" id="problemSelect" aria-label="選擇 problem（資料集）"></select>
+        <span class="problem-hint" id="problemHint"></span>
+      </div>
+      <button class="ps-add" id="dsOpen" title="輸入任意 CSV 網址或貼上內容，自動跑完整 CRISP-DM 分析">＋ 新增資料集</button>
+    </div>
+    <button class="theme-btn" id="themeBtn">🌙 深色</button>
+    <div class="nav-links">
+      <a href="#overview">總覽</a>
+      <a href="#crispdm">CRISP-DM</a>
+      <a href="#explorer">模型探索</a>
+      <a href="#predict">互動預測</a>
+      <a href="#diagnostics">診斷與結論</a>
+    </div>
+  </nav>
+
+  <!-- ================= HERO ================= -->
+  <header class="hero" id="overview">
+    <span class="eyebrow" id="hero-eyebrow"></span>
+    <h1 id="hero-title"></h1>
+    <p class="lead" id="hero-lead"></p>
+    <div class="badges" id="hero-badges"></div>
+    <div class="grid g-4" id="hero-stats" style="margin-top:22px"></div>
+  </header>
+
+  <!-- ================= CRISP-DM ================= -->
+  <section id="crispdm" class="panel">
+    <div class="panel-head">
+      <div>
+        <h2><span class="phase-num">✦</span><span id="t-crispdm"></span></h2>
+        <p id="l-crispdm"></p>
+      </div>
+      <span class="badge cyan mono" id="crispdm-version"></span>
+    </div>
+    <div class="stepper" id="stepper"></div>
+
+    <!-- Phase 1 -->
+    <div class="pane active" data-pane="1">
+      <div class="grid g-2">
+        <div>
+          <h3>🎯 業務目標（Business Objective）</h3>
+          <ul class="clean" id="p1-objective" style="margin-top:12px"></ul>
+        </div>
+        <div>
+          <h3>✅ 成功標準（Success Criteria）</h3>
+          <div class="table-wrap" style="margin-top:12px;max-height:none">
+            <table id="p1-criteria"></table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 2 -->
+    <div class="pane" data-pane="2">
+      <div class="grid g-4" id="data-quality" style="margin-bottom:18px"></div>
+      <div class="grid g-2" id="p2-grid">
+        <div>
+          <h3>📋 敘述統計</h3>
+          <div class="table-wrap" style="margin-top:12px;max-height:none"><table id="describe-table"></table></div>
+        </div>
+        <div>
+          <h3>🔗 相關係數矩陣</h3>
+          <div class="table-wrap" style="margin-top:12px;max-height:none"><table id="corr-table" class="matrix"></table></div>
+          <h3 style="margin-top:20px">💡 資料理解結論</h3>
+          <ul class="clean" id="p2-conclusions" style="margin-top:10px"></ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 3 -->
+    <div class="pane" data-pane="3">
+      <div class="grid g-2">
+        <div>
+          <h3>🧪 前處理與切分</h3>
+          <ul class="clean" id="p3-steps" style="margin-top:12px"></ul>
+        </div>
+        <div>
+          <h3>⚠️ 共線性檢查（VIF）</h3>
+          <div class="table-wrap" style="margin-top:12px;max-height:none"><table id="vif-table"></table></div>
+          <div class="note" id="p3-vif-note"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 4 -->
+    <div class="pane" data-pane="4">
+      <h3 id="baseline-title"></h3>
+      <div class="grid g-4" id="baseline-stats" style="margin-top:12px"></div>
+      <div class="equation mono" id="baseline-eq" style="margin-top:14px"></div>
+
+      <h3 style="margin-top:26px" id="ranking-title"></h3>
+      <p id="ranking-note" style="color:var(--muted);font-size:13.5px;margin-top:6px"></p>
+      <div class="grid g-2" id="p4-grid" style="margin-top:14px">
+        <div class="table-wrap"><table id="ranking-table"></table></div>
+        <div class="table-wrap"><table id="cv-grid-table"></table></div>
+      </div>
+
+      <h3 style="margin-top:26px" id="backward-title"></h3>
+      <div class="timeline" id="backward-timeline"></div>
+      <div class="equation mono" id="selected-eq" style="margin-top:14px"></div>
+    </div>
+
+    <!-- Phase 5 -->
+    <div class="pane" data-pane="5">
+      <div class="grid g-2" id="p5-grid">
+        <div>
+          <h3 id="tension-title"></h3>
+          <ul class="clean" id="p5-tension" style="margin-top:12px"></ul>
+          <div class="note" id="selection-note"></div>
+        </div>
+        <div>
+          <h3 id="selected-coef-title"></h3>
+          <div class="table-wrap" style="margin-top:12px;max-height:none"><table id="selected-coef-table"></table></div>
+        </div>
+      </div>
+      <h3 style="margin-top:26px" id="heat-title"></h3>
+      <div class="table-wrap" style="margin-top:12px;max-height:none"><table id="test-grid-table"></table></div>
+      <div class="legend">
+        <span><i style="background:var(--emerald)"></i>較佳（RMSE 低）</span>
+        <span><i style="background:var(--amber)"></i>中等</span>
+        <span><i style="background:var(--rose)"></i>較差（RMSE 高）</span>
+      </div>
+    </div>
+
+    <!-- Phase 6 -->
+    <div class="pane" data-pane="6">
+      <div class="grid g-2">
+        <div>
+          <h3>📦 交付物（Artefacts）</h3>
+          <ul class="clean" id="p6-artifacts" style="margin-top:12px"></ul>
+        </div>
+        <div>
+          <h3>🔭 監控與後續</h3>
+          <ul class="clean" id="p6-monitoring" style="margin-top:12px"></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= EXPLORER ================= -->
+  <section id="explorer" class="panel">
+    <div class="panel-head">
+      <div>
+        <h2><span class="phase-num">▶</span><span id="t-explorer"></span></h2>
+        <p id="l-explorer"></p>
+      </div>
+      <span class="badge violet mono" id="explorer-tag"></span>
+    </div>
+    <div class="warn-banner" id="chart-warning">⚠️ 無法載入 Chart.js（離線狀態），圖表已停用，但所有數據表格仍可正常使用。</div>
+
+    <div class="controls">
+      <div>
+        <label class="fl" for="algoSelect">特徵選擇方法</label>
+        <select id="algoSelect"></select>
+      </div>
+      <div>
+        <label class="fl" for="kRange">特徵數量 k = <span id="kValue" class="mono v-cyan">2</span></label>
+        <input type="range" id="kRange" min="1" max="5" step="1" value="2">
+        <div class="k-ticks" id="k-ticks"></div>
+      </div>
+      <div>
+        <label class="fl">快速選擇</label>
+        <div class="chip-row" id="k-chips"></div>
+      </div>
+    </div>
+
+    <div class="grid g-4" id="metric-grid"></div>
+
+    <h3 style="margin-top:24px">🧮 迴歸方程式（原始單位）</h3>
+    <div class="equation mono" id="equation" style="margin-top:10px"></div>
+    <p style="color:var(--muted);font-size:12.5px;margin-top:9px" id="equation-note"></p>
+
+    <div class="grid g-2" style="margin-top:22px">
+      <div class="chart-box">
+        <div class="chart-title">CV RMSE 對 k <small>5-fold cross-validation（越低越好）</small></div>
+        <div class="chart-canvas"><canvas id="chart-rmse"></canvas></div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">測試集 R² 對 k <small>hold-out（越高越好）</small></div>
+        <div class="chart-canvas"><canvas id="chart-r2"></canvas></div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:26px">📑 係數推論統計（Coefficients &amp; Inference）</h3>
+    <p style="color:var(--muted);font-size:12.5px;margin-top:6px">
+      β 為原始單位係數；SE 為標準誤、t 為 t 統計量、p 為顯著性、95% CI 為信賴區間、VIF 為變異數膨脹因子。
+      顯著性標記：<span class="sig">*** p&lt;.001</span>、<span class="sig">** p&lt;.01</span>、<span class="sig">* p&lt;.05</span>、<span class="ns">n.s.</span>
+    </p>
+    <div class="table-wrap" style="margin-top:12px"><table id="coef-table"></table></div>
+
+    <h3 style="margin-top:26px">🧪 測試集樣本預測與殘差（Top 10 Outliers）</h3>
+    <div class="grid g-2" style="margin-top:12px">
+      <div class="table-wrap"><table id="outlier-table"></table></div>
+      <div class="chart-box tall">
+        <div class="chart-title">殘差 vs 預測值 <small>out-of-sample，紅線為 0</small></div>
+        <div class="chart-canvas"><canvas id="chart-resid"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PREDICT ================= -->
+  <section id="predict" class="panel">
+    <div class="panel-head">
+      <div>
+        <h2><span class="phase-num">⛭</span><span id="t-predict"></span></h2>
+        <p id="l-predict"></p>
+      </div>
+      <span class="badge" id="api-badge">偵測後端 API…</span>
+    </div>
+
+    <div class="predictor-grid" id="predictor-inputs"></div>
+
+    <div class="grid g-2" style="margin-top:22px">
+      <div>
+        <div class="grid g-2">
+          <div class="stat" style="border-color:rgba(0,242,254,.4)">
+            <div class="label">預測值</div>
+            <div class="value v-cyan mono" id="pred-total">$0</div>
+            <div class="sub" id="pred-band"></div>
+          </div>
+          <div class="stat">
+            <div class="label">實際樣本參考</div>
+            <div class="value mono" id="pred-ref">$0</div>
+            <div class="sub" id="predict-ref-sub">訓練資料平均</div>
+          </div>
+        </div>
+        <div class="api-row" id="api-row"></div>
+      </div>
+      <div>
+        <div class="chart-box tall" style="height:320px">
+          <div class="chart-title">各項貢獻拆解 <small>相對平均值的加減價</small></div>
+          <div class="chart-canvas"><canvas id="chart-contrib"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="margin-top:16px;max-height:320px"><table id="breakdown-table"></table></div>
+  </section>
+
+  <!-- ================= DIAGNOSTICS ================= -->
+  <section id="diagnostics" class="panel">
+    <div class="panel-head">
+      <div>
+        <h2><span class="phase-num">✓</span><span id="t-diagnostics"></span></h2>
+        <p id="l-diagnostics"></p>
+      </div>
+      <span class="badge ok" id="diag-tag"></span>
+    </div>
+
+    <h3>🧭 迴歸假設檢定（以測試集最佳模型計算）</h3>
+    <div class="grid g-4" id="assumption-grid" style="margin-top:12px"></div>
+
+    <h3 style="margin-top:26px">🏆 各方法最佳子集總覽</h3>
+    <div class="table-wrap" style="margin-top:12px"><table id="summary-table"></table></div>
+
+    <h3 style="margin-top:26px" id="dataset-title"></h3>
+    <div class="controls" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+      <div>
+        <label class="fl" for="stateFilter">依類別篩選</label>
+        <select id="stateFilter"><option value="">全部</option></select>
+      </div>
+      <div>
+        <label class="fl" for="sortSelect">排序</label>
+        <select id="sortSelect"></select>
+      </div>
+      <div>
+        <label class="fl" for="searchBox">搜尋</label>
+        <input type="text" id="searchBox" placeholder="例：California / 12">
+      </div>
+    </div>
+    <div class="table-wrap" style="max-height:420px"><table id="dataset-table"></table></div>
+
+    <div class="note" style="margin-top:20px" id="diagnostics-conclusion"></div>
+  </section>
+
+  <footer>
+    <div id="footer-brand">CRISP-DM Multiple Linear Regression Studio ｜ 5115056033 HW2</div>
+    <div id="footer-links"></div>
+    <div id="footer-dataset"></div>
+    <div>版面樣式靈感取自 <a href="https://statsunlock.com/multiple-linear-regression-calculator/" target="_blank" rel="noopener">StatsUnlock</a></div>
+  </footer>
+</div>
+
+<!-- ================= ARBITRARY DATASET MODAL ================= -->
+<div class="modal-mask" id="dsModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="dsTitle">
+    <div class="modal-head">
+      <h3 id="dsTitle">📥 新增資料集 · 自動 CRISP-DM 分析</h3>
+      <button class="modal-x" id="dsClose" aria-label="關閉">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="hint" style="margin-top:0">
+        輸入一個 <b>CSV 網址</b>（需支援 CORS，例如 GitHub raw），或直接貼上 CSV 文字。
+        所有計算都在你的瀏覽器完成，資料不會上傳。分析會自動清理欄位、切分資料、跑 5-fold CV、
+        三種特徵選擇法與 OLS 推論統計。
+      </p>
+
+      <label class="fl" for="dsUrl">CSV 網址</label>
+      <input type="text" id="dsUrl" spellcheck="false"
+             placeholder="https://raw.githubusercontent.com/Avik-Jain/100-Days-Of-ML-Code/master/datasets/50_Startups.csv">
+      <div class="ds-actions">
+        <button class="btn primary" id="dsFetch">載入並預覽</button>
+        <button class="btn" id="dsExample">使用範例網址</button>
+        <span class="hint" id="dsStatus">支援 .csv 純文字；上限 60,000 列 / 24 個編碼特徵</span>
+      </div>
+
+      <details class="ds-paste">
+        <summary>或直接貼上 CSV 文字（略過 CORS 限制）</summary>
+        <textarea id="dsPaste" rows="6" spellcheck="false" placeholder="col_a,col_b,target&#10;1,2,3&#10;4,5,6"></textarea>
+        <button class="btn" id="dsUsePaste">使用貼上的內容</button>
+      </details>
+
+      <div id="dsPreview" hidden>
+        <div class="ds-preview-head">
+          <b id="dsName">—</b>
+          <span class="hint" id="dsShape"></span>
+        </div>
+        <div class="table-wrap" style="max-height:180px"><table id="dsPreviewTable"></table></div>
+
+        <div class="ds-options">
+          <div>
+            <label class="fl" for="dsTarget">目標欄位（必須為數值）</label>
+            <select id="dsTarget"></select>
+          </div>
+          <div>
+            <label class="fl" for="dsTest">測試集比例：<span class="mono" id="dsTestOut">20%</span></label>
+            <input type="range" id="dsTest" min="0.1" max="0.4" step="0.05" value="0.2">
+          </div>
+          <div>
+            <label class="fl" for="dsFolds">交叉驗證摺數</label>
+            <select id="dsFolds">
+              <option value="3">3-fold</option>
+              <option value="5" selected>5-fold</option>
+              <option value="10">10-fold</option>
+            </select>
+          </div>
+          <div>
+            <label class="fl" for="dsK">最大特徵數 k</label>
+            <select id="dsK">
+              <option value="5">k = 1–5</option>
+              <option value="8" selected>k = 1–8</option>
+              <option value="12">k = 1–12</option>
+              <option value="16">k = 1–16</option>
+            </select>
+          </div>
+        </div>
+        <div class="ds-actions">
+          <button class="btn primary" id="dsRun">開始分析</button>
+          <span class="hint">固定隨機種子，同樣的資料會得到同樣的結果</span>
+        </div>
+      </div>
+
+      <div class="ds-log" id="dsLog" hidden></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
